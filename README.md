@@ -6,6 +6,22 @@ Borrador de frontend en **Svelte 5 + Vite** para los dos casos del PDF. Interfaz
 
 Node 22.12+ (probado con Node 25). `npm install`, luego `npm run dev`. Abrir http://127.0.0.1:5173. Validación: `npm run check`, `npm test`, `npm run test:e2e` (requiere Chrome) y `npm run build`. La compilación estática queda en `dist/`; se puede publicar con comando `npm run build` y directorio `dist` en un hosting estático. Este borrador no se ha desplegado.
 
+## Desplegar en Cloudflare Pages
+
+Conectar este repositorio como proyecto de **Pages** con estos ajustes:
+
+- Rama de producción: `main`.
+- Framework preset: `None` (es Svelte + Vite, sin SvelteKit).
+- Directorio raíz: raíz del repositorio (dejar vacío).
+- Build command: `npm run build`.
+- Build output directory: `dist`.
+
+`.node-version` fija Node 22.16.0, compatible con Vite 7. Si el proyecto ya tiene una variable `NODE_VERSION`, quitarla o usar el mismo valor. Pages instala las dependencias antes de compilar; incluir las dependencias de desarrollo porque contienen Vite y el compilador de Svelte. No se necesitan secretos, funciones ni un comando de despliegue para la integración Git de Pages.
+
+Los archivos de ejemplo importados desde `datos/` están versionados y se incluyen en el bundle; `clientes.csv` queda excluido. Para reproducir una instalación limpia: `npm ci`, `npm run check`, `npm test` y `npm run build`.
+
+Referencias: [configuración de builds](https://developers.cloudflare.com/pages/configuration/build-configuration/) y [versión de Node](https://developers.cloudflare.com/pages/configuration/build-image/).
+
 ## Criterio y datos
 
 - Priorizar días de agente inactivo, después activación estancada, baja adopción persistente y atrasos; desempatar por MRR. Expansión: dos meses completos consecutivos sobre el límite del mismo plan. El potencial es la diferencia al siguiente plan, no ingreso garantizado. MRR en riesgo se cuenta una sola vez por cuenta.
