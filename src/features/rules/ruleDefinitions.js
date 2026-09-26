@@ -1,0 +1,42 @@
+export const ruleDefinitions = [
+  {
+    key: 'inactivity',
+    title: 'Inactividad del agente',
+    desc: 'Priorizar incidentes desde este número de días en el último corte.',
+    min: 1,
+    max: 15,
+    unit: 'días',
+  },
+  {
+    key: 'panel',
+    title: 'Baja adopción del panel',
+    desc: 'Como máximo estas sesiones en cada uno de dos meses completos consecutivos.',
+    min: 0,
+    max: 10,
+    unit: 'sesiones',
+  },
+  {
+    key: 'lowUsage',
+    title: 'Activación estancada',
+    desc: 'Máximo de conversaciones por mes, dos meses completos, entre 30 y 120 días desde checkout.',
+    min: 0,
+    max: 100,
+    unit: 'conversaciones',
+  },
+  {
+    key: 'upsell',
+    title: 'Expansión sostenida',
+    desc: 'Uso sobre este porcentaje del plan, durante dos meses completos consecutivos.',
+    min: 100,
+    max: 200,
+    unit: '%',
+  },
+  {
+    key: 'late',
+    title: 'Atraso en el pago',
+    desc: 'Días de atraso para abrir una conversación de facturación.',
+    min: 5,
+    max: 60,
+    unit: 'días',
+  },
+];

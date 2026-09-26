@@ -1,0 +1,121 @@
+/* Keep secondary text readable against the light workspace surfaces. */
+:root {
+  --muted: #74717f;
+}
+.page-heading p,
+.period,
+.stat-card p,
+.queue-heading p,
+.table-footer,
+.bottom-note,
+.micro,
+.muted {
+  color: #77717f;
+}
+.account-cell strong {
+  color: #484150;
+}
+.account-cell small,
+.evidence {
+  color: #827787;
+}
+.mrr {
+  color: #665771;
+}
+.owner {
+  color: #82718c;
+}
+th {
+  color: #83758e;
+}
+.badge.critical {
+  color: #ae5758;
+}
+.badge.risk {
+  color: #967026;
+}
+.badge.growth {
+  color: #7953a6;
+}
+.neutral {
+  color: #70667a !important;
+}
+.stat-card > div {
+  color: #77707f;
+}
+.stat-card > strong {
+  color: #302d3b;
+}
+.stat-card > strong > small {
+  color: #84788d;
+}
+.focus-panel p {
+  color: #847291;
+}
+.focus-panel button {
+  color: #755298;
+}
+.signal-bar-row > div:first-child {
+  color: #82748d;
+}
+.queue-panel .search input,
+.search-tools select {
+  color: #786781;
+}
+.sort-label {
+  color: #877291;
+}
+.tabs button {
+  color: #867291;
+}
+.tabs button.chosen {
+  color: #78539e;
+}
+.data-hint {
+  color: #867294;
+}
+.data-hint button {
+  color: #765097;
+}
+.table-footer,
+.page-footer {
+  color: #8c7e98;
+}
+.rule p,
+.checkbox small,
+.upload-card > p,
+.file-status,
+.quality-grid span,
+.info-block,
+.range-control output,
+.rules-impact > p,
+.rules-impact > div {
+  color: #84708f;
+}
+.prompt-editor {
+  color: #695875;
+}
+.chat-placeholder p,
+.chat-disclaimer,
+.chat-compose textarea,
+.test-card p,
+.question-row p {
+  color: #897393;
+}
+.test-card h3,
+.drawer-title h2,
+.drawer-section h3 {
+  color: #644d76;
+}
+.test-response,
+.message-draft,
+.reason-card p,
+.reason-card small,
+.drawer-metrics span,
+.drawer-metrics strong,
+.drawer-section > p {
+  color: #846c95;
+}
+nav button .little-dot {
+  flex: none !important;
+}
