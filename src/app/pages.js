@@ -1,4 +1,11 @@
 export const pages = {
+  'deep-dive': {
+    label: 'Deep Dive',
+    title: 'Deep Dive',
+    description:
+      'Explora las métricas y la evolución de un cliente o de todo un rubro.',
+    eyebrow: 'WORKSPACE / ANÁLISIS',
+  },
   overview: {
     label: 'Resumen',
     title: 'Resumen de cartera',

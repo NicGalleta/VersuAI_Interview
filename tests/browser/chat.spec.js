@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { initialPrompt } from '../../src/features/notco/data/prompt.js';
 import { chatEndpoint } from '../../src/features/notco/chat.js';
 
 async function openAgent(page) {
@@ -165,15 +166,11 @@ test('collapsible prompt sections preserve the full prompt when editing and send
   });
   await page.goto('/');
   await page.getByRole('button', { name: 'Agente NotCo', exact: true }).click();
-  await expect(page.locator('.prompt-section')).toHaveCount(7);
+  await expect(page.locator('.prompt-section')).toHaveCount(8);
   await expect(
     page.getByRole('button', { name: 'Guardar versión' }),
   ).toBeDisabled();
-  const downloading = page.waitForEvent('download');
-  await page.getByRole('button', { name: 'Descargar prompt' }).click();
-  const stream = await (await downloading).createReadStream();
-  let original = '';
-  for await (const chunk of stream) original += chunk;
+  const original = initialPrompt;
   await page
     .locator('.prompt-section summary')
     .filter({ hasText: /^IDENTIDAD$/ })
@@ -226,5 +223,5 @@ test('collapsible prompt sections preserve the full prompt when editing and send
   await page.locator('.revisions summary').click();
   await page.locator('.revisions button').last().click();
   await expect(identity).toHaveValue('Identidad temporal.');
-  await expect(page.locator('.prompt-section')).toHaveCount(7);
+  await expect(page.locator('.prompt-section')).toHaveCount(8);
 });

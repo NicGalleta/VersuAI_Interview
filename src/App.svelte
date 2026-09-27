@@ -10,6 +10,8 @@
   import DataSourcesPage from './features/data-sources/DataSourcesPage.svelte';
   import RulesPage from './features/rules/RulesPage.svelte';
   import NotCoPage from './features/notco/NotCoPage.svelte';
+  import DeepDivePage from './features/deep-dive/DeepDivePage.svelte';
+  import { createDeepDive } from './features/deep-dive/createDeepDive.svelte.js';
   import { createNavigation } from './app/createNavigation.svelte.js';
   import { createDataSources } from './features/data-sources/createDataSources.svelte.js';
   import { createPortfolio } from './features/portfolio/createPortfolio.svelte.js';
@@ -25,6 +27,7 @@
   });
   const portfolio = createPortfolio(sources, () => navigation.page);
   const agent = createNotCoAgent(feedback);
+  const dive = createDeepDive(sources, () => portfolio.rules);
 </script>
 
 <div class="app-shell">
@@ -44,6 +47,12 @@
         <PortfolioPage {navigation} {sources} {portfolio} />
       {:else if navigation.page === 'data'}
         <DataSourcesPage {sources} {portfolio} />
+      {:else if navigation.page === 'deep-dive'}
+        <DeepDivePage
+          {dive}
+          partial={portfolio.rules.partial}
+          onUpload={() => navigation.navigate('data')}
+        />
       {:else if navigation.page === 'rules'}
         <RulesPage {navigation} {portfolio} />
       {:else if navigation.page === 'agent'}
@@ -53,4 +62,13 @@
     </main>
   </div>
 </div>
-<AccountDrawer {portfolio} />
+<AccountDrawer
+  {portfolio}
+  onDeepDive={(id) => {
+    dive.mode = 'client';
+    dive.entityId = id;
+    dive.month = portfolio.selected.current.mes;
+    portfolio.selectedId = null;
+    navigation.navigate('deep-dive');
+  }}
+/>

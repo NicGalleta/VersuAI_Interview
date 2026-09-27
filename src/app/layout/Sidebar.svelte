@@ -2,6 +2,7 @@
   import {
     LayoutDashboard,
     Users,
+    ChartNoAxesCombined,
     Bot,
     SlidersHorizontal,
     Database,
@@ -13,6 +14,7 @@
   const nav = [
     { id: 'overview', label: 'Resumen', icon: LayoutDashboard },
     { id: 'accounts', label: 'Cartera de clientes', icon: Users },
+    { id: 'deep-dive', label: 'Deep Dive', icon: ChartNoAxesCombined },
     { id: 'agent', label: 'Agente NotCo', icon: Bot },
   ];
 </script>
@@ -66,7 +68,9 @@
       ><SlidersHorizontal size={18} />Reglas y criterios</button
     >
   </nav>
-  <span class="local-badge" title="Datos locales"><span></span>Datos locales</span>
+  <span class="local-badge" title="Datos locales"
+    ><span></span>Datos locales</span
+  >
   <div class="sidebar-bottom">
     <div class="draft-note">
       <Sparkles size={17} /><strong>Menos ruido. Más foco.</strong>

@@ -466,15 +466,6 @@
   .account-drawer {
     padding: 20px;
   }
-  .drawer-metrics {
-    padding: 13px;
-  }
-  .drawer-metrics strong {
-    font-size: 11px;
-  }
-  .drawer-metrics span {
-    font-size: 9px;
-  }
   .notice {
     font-size: 11px;
     line-height: 1.6;

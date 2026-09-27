@@ -7,7 +7,7 @@ test('dashboard filters, account drawer and draft export work', async ({
   page.on('pageerror', (e) => errors.push(e.message));
   await page.goto('/');
   await expect(
-    page.getByRole('heading', { name: 'Tu semana, bajo control.' }),
+    page.getByRole('heading', { name: 'Resumen de cartera' }),
   ).toBeVisible();
   await expect(page.locator('tbody tr').first()).toBeVisible();
   await page.screenshot({ path: '/tmp/versu-desktop.png', fullPage: false });
@@ -16,19 +16,38 @@ test('dashboard filters, account drawer and draft export work', async ({
   await expect(page.locator('tbody tr')).toHaveCount(1);
   await page.locator('.row-action').first().click();
   await expect(page.getByRole('dialog')).toBeVisible();
-  await expect(page.locator('.message-draft')).toContainText(name);
+  await expect(page.getByRole('dialog')).toContainText(name);
+  await expect(page.locator('.message-draft')).toContainText(
+    'Queremos revisar con ustedes la continuidad del agente.',
+  );
+  await expect(
+    page.getByRole('heading', { name: 'Por qué revisar esta cuenta' }),
+  ).toBeVisible();
+  await expect(page.locator('.history-chart, .drawer-metrics')).toHaveCount(0);
   const downloading = page.waitForEvent('download');
   await page
     .getByRole('dialog')
     .getByRole('button', { name: 'Descargar', exact: true })
     .click();
-  expect((await downloading).suggestedFilename()).toMatch(/mensaje.txt$/);
+  const filename = (await downloading).suggestedFilename();
+  expect(filename).toMatch(/-mensaje.txt$/);
+  const clientId = filename.replace(/-mensaje.txt$/, '');
   await page.keyboard.press('Escape');
   await expect(page.getByRole('dialog')).toHaveCount(0);
+  await page.locator('.account-cell').first().click();
+  await page.getByRole('button', { name: `Ver Deep Dive de ${name}` }).click();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect(
+    page.getByRole('combobox', { name: 'Cliente', exact: true }),
+  ).toHaveValue(clientId);
+  await expect(page.locator('.dd-context h2')).toHaveText(name);
+  await page.getByRole('button', { name: 'Resumen', exact: true }).click();
   await page
     .getByRole('textbox', { name: 'Buscar cliente' })
     .fill('no-such-client');
-  await expect(page.getByText('No hay cuentas en esta vista')).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'Sin resultados' }),
+  ).toBeVisible();
   expect(errors).toEqual([]);
 });
 
@@ -58,10 +77,11 @@ test('CSV validation preserves previous data and accepts a private profile uploa
     .fill('Prueba privada');
   await expect(page.locator('tbody tr')).toHaveCount(1);
   await page.locator('.row-action').click();
-  await expect(page.getByRole('dialog')).toContainText('demo@example.com');
+  await expect(page.locator('.message-draft')).toContainText('Hola Persona');
   await page.reload();
+  await page.getByRole('button', { name: 'Cartera de clientes' }).click();
   await expect(page.getByText('Vista de ejemplo')).toBeVisible();
-  await expect(page.getByText('demo@example.com')).toHaveCount(0);
+  await expect(page.getByText('Prueba privada')).toHaveCount(0);
 });
 
 test('criteria recalculate and NotCo exports current prompt with all eight tests', async ({
@@ -118,7 +138,7 @@ test('mobile layout stays within viewport and navigation remains available', asy
   await page.screenshot({ path: '/tmp/versu-mobile.png', fullPage: false });
   await page.getByRole('button', { name: 'Agente NotCo', exact: true }).click();
   await expect(
-    page.getByRole('heading', { name: 'Una voz muy NotCo.' }),
+    page.getByRole('heading', { name: 'Agente NotCo', exact: true }),
   ).toBeVisible();
   expect(
     await page.evaluate(() => document.documentElement.scrollWidth),

@@ -24,6 +24,8 @@ Referencias: [configuración de builds](https://developers.cloudflare.com/pages/
 
 ## Criterio y datos
 
+**Deep Dive** permite seleccionar un cliente o un rubro, explorar las 21 métricas numéricas de `uso_mensual.csv` por mes y consultar su evolución. Los rubros requieren cargar `clientes.csv`; se unen por ID. Los agregados suman volúmenes e importes y promedian tiempos y días por cliente con dato, mostrando cobertura y meses parciales. La vista incluye todas las cuentas con historial de uso, independientemente de su estado. Las definiciones y cálculos viven en un registro extensible de métricas, separado de la interfaz.
+
 - Priorizar días de agente inactivo, después activación estancada, baja adopción persistente y atrasos; desempatar por MRR. Expansión: dos meses completos consecutivos sobre el límite del mismo plan. El potencial es la diferencia al siguiente plan, no ingreso garantizado. MRR en riesgo se cuenta una sola vez por cuenta.
 - El último mes se considera parcial (exportación del día 21); solo se usa para incidentes y atrasos. Se puede cambiar en **Reglas y criterios**. No se alerta por caída de volumen aislada para evitar confundir estacionalidad con abandono. La comparación por rubro queda pendiente.
 - Carga desde pantalla; encabezados obligatorios, CSV malformados, números inválidos, duplicados y archivos vacíos producen errores conservando la carga anterior. IDs y encabezados se normalizan; no se unen cuentas por nombre. Vacíos numéricos siguen siendo desconocidos. Solo cuentas activas con corte reciente entran en la lista al cargar fichas. Fichas sin uso aparecen contadas en calidad de datos.

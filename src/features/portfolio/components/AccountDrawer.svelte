@@ -1,11 +1,9 @@
 <script>
   import focusDrawer from '../../../shared/actions/focusDrawer.js';
-  import { X } from 'lucide-svelte';
-  import { money } from '../../../shared/utils/format.js';
-  import AccountHistory from './AccountHistory.svelte';
+  import { X, ArrowUpRight } from 'lucide-svelte';
   import MessageDraft from './MessageDraft.svelte';
 
-  let { portfolio } = $props();
+  let { portfolio, onDeepDive } = $props();
 </script>
 
 <svelte:window
@@ -37,29 +35,13 @@
       >
     </div>
     <div class="drawer-title">
-      <div class="account-avatar big">
-        {portfolio.selected.name.slice(0, 2).toUpperCase()}
-      </div>
-      <h2>{portfolio.selected.name}</h2>
-      <p>
-        {portfolio.selected.id} · {portfolio.selected.profile?.pais ||
-          'País sin ficha'} · {portfolio.selected.current.plan}
-      </p>
-    </div>
-    <div class="drawer-metrics">
-      <div>
-        <span>MRR actual</span><strong
-          >{money(portfolio.selected.current.mrr_usd)}</strong
-        >
-      </div>
-      <div>
-        <span>Responsable</span><strong
-          >{portfolio.selected.profile?.ops_owner || 'Sin ficha'}</strong
-        >
-      </div>
-      <div>
-        <span>Estado</span><strong
-          >{portfolio.selected.profile?.estado || 'Sin confirmar'}</strong
+      <div class="drawer-title-row">
+        <h2>{portfolio.selected.name}</h2>
+        <button
+          class="button primary"
+          aria-label={`Ver Deep Dive de ${portfolio.selected.name}`}
+          onclick={() => onDeepDive(portfolio.selected.id)}
+          >Deep Dive <ArrowUpRight size={16} /></button
         >
       </div>
     </div>
@@ -80,17 +62,6 @@
           a una cuenta sana.
         </p>{/if}
     </section>
-    <AccountHistory {portfolio} />
     <MessageDraft {portfolio} />
-    {#if portfolio.selected.profile}<section class="drawer-section">
-        <h3>Contacto</h3>
-        <p>
-          {portfolio.selected.profile.contacto_nombre || 'Sin nombre'} · {portfolio
-            .selected.profile.contacto_email || 'Sin correo'}
-        </p>
-        <p class="muted">
-          {portfolio.selected.profile.telefono || 'Sin teléfono'}
-        </p>
-      </section>{/if}
   </div>
 {/if}

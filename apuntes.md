@@ -23,7 +23,7 @@ Todo estaba en los datos, busquemoslo
 ## Si tuviera una semana.....
 
 - Agregar columna de metodo preferido de comunicacion por cliente y revelar la integracion (email, slack, etc dinamicamente)
-- entrenar un modelo de Machine Learning en base a todos los datos numéricos con regresion logistica/binaria que infiera _comportamiento normal_ y _comporamiento extraño -> revisar_
+- Agregar columna de "dia de facturacion" por cliente. Esto cambia un poco los datos: upsell no es tan importante para "llamada de dia lunes" pero si podria serlo si es que un cliente sobrepasa mucho su limite y esta a punto de renovar.
 - Que tipo de clientes tiene cada cliente? ver si son mayoritariamente B2B o B2C (podria ser una nueva columna en clientes.csv). Esto me puede ayudar a crear/diferenciar el prompt
 - Ver más metadatos del chatter para diferenciar el prompt
   1. Por ejemplo, si el chatter tiene cuenta en la página o historial en el chat, se puede diferenciar o profundizar el prompt
@@ -45,4 +45,5 @@ Todo estaba en los datos, busquemoslo
 - OpenAI chatgpt: organizacion, analisis
 - OpenAI Codex: implementacion frontend
 - Cloudfare AI Assistant: simple infraestructura cloud (workers)
-- Meta: @cf/meta/llama-3.1-8b-instruct LLM como chatbot
+- Meta: @cf/meta/llama-3.1-8b-instruct LLM como chatbot (primera iteracion)
+- Meta: @cf/meta/llama-3.3-70b-instruct-fp8-fast LLM como chatbot (segunda iteracion)
