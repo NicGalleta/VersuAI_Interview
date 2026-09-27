@@ -1,6 +1,18 @@
 <script>
-  import { Bot, Download } from 'lucide-svelte';
+  import { Bot, Send, RotateCcw } from 'lucide-svelte';
   let { agent } = $props();
+  function scrollToLatest(node) {
+    const observer = new MutationObserver(() => {
+      node.scrollTop = node.scrollHeight;
+    });
+    observer.observe(node, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+    });
+    node.scrollTop = node.scrollHeight;
+    return { destroy: () => observer.disconnect() };
+  }
 </script>
 
 <section class="panel chat-panel">
@@ -11,35 +23,70 @@
         <strong>Nota</strong><small>Vista previa de conversación</small>
       </div>
     </div>
-    <Bot size={19} />
+    <button
+      class="icon-button"
+      aria-label="Nueva conversación"
+      disabled={agent.sending}
+      onclick={agent.resetChat}><RotateCcw size={19} /></button
+    >
   </div>
-  <div class="chat-body">
+  <div
+    class="chat-body"
+    role="log"
+    aria-label="Conversación con Nota"
+    aria-live="polite"
+    use:scrollToLatest
+  >
     <span class="chat-date">ENTORNO DE PRUEBA</span>
-    <div class="chat-placeholder">
-      <Bot size={32} />
-      <h3>Lista para conectar.</h3>
-      <p>
-        El prompt está preparado. Conecta un backend de IA para conversar y
-        evaluar respuestas reales.
-      </p>
-      <span class="badge neutral">Sin respuestas simuladas</span>
-    </div>
-    {#if agent.query}<div class="user-bubble">{agent.query}</div>{/if}
+    {#if !agent.messages.length}
+      <div class="chat-placeholder">
+        <Bot size={32} />
+        <h3>Prueba el prompt con Nota.</h3>
+        <p>
+          Escribe un mensaje para recibir una respuesta con las instrucciones
+          actuales del editor.
+        </p>
+      </div>
+    {/if}
+    {#each agent.messages as message}
+      <div class={message.role === 'user' ? 'user-bubble' : 'assistant-bubble'}>
+        {message.content}
+      </div>
+    {/each}
+    {#if agent.sending}<p class="chat-loading">Nota está escribiendo…</p>{/if}
   </div>
-  <div class="chat-compose">
+  {#if agent.chatError}<p class="chat-error" role="alert">
+      {agent.chatError} Tu mensaje está listo para reenviar.
+    </p>{/if}
+  <form
+    class="chat-compose"
+    onsubmit={(event) => {
+      event.preventDefault();
+      agent.sendMessage();
+    }}
+  >
     <textarea
       aria-label="Mensaje de prueba"
       placeholder="Escribe un mensaje de prueba…"
       bind:value={agent.query}
-      rows="2"></textarea><button
+      disabled={agent.sending}
+      onkeydown={(event) => {
+        if (event.key === 'Enter' && !event.shiftKey && !event.isComposing) {
+          event.preventDefault();
+          agent.sendMessage();
+        }
+      }}
+      rows="2"></textarea>
+    <button
+      type="submit"
       class="icon-button"
-      disabled={!agent.query.trim()}
-      aria-label="Exportar consulta con el prompt actual"
-      onclick={() => agent.testPayload([agent.query])}
-      ><Download size={19} /></button
+      disabled={agent.sending || !agent.query.trim()}
+      aria-label="Enviar mensaje"><Send size={19} /></button
     >
-  </div>
+  </form>
   <p class="chat-disclaimer">
-    Exporta la consulta con el prompt actual. No se envía a un modelo.
+    El prompt y esta conversación se envían a Cloudflare Workers AI. Las
+    respuestas pueden contener errores. Nueva conversación borra el historial de
+    esta sesión.
   </p>
 </section>

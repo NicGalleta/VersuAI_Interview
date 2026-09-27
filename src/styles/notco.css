@@ -260,3 +260,35 @@
   color: #9c7fae;
   line-height: 1.7;
 }
+
+.chat-body {
+  max-height: 520px;
+  overflow-y: auto;
+  gap: 12px;
+}
+.user-bubble,
+.assistant-bubble,
+.test-response {
+  white-space: pre-wrap;
+}
+.assistant-bubble {
+  align-self: flex-start;
+  background: #fff;
+  color: #493955;
+  padding: 12px 15px;
+  border: 1px solid var(--border);
+  border-radius: 12px 12px 12px 0;
+  max-width: 85%;
+  overflow-wrap: anywhere;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.chat-error {
+  padding: 12px 15px;
+  color: #982f3d;
+  font-size: 12px;
+}
+.chat-loading {
+  font-size: 12px;
+  color: #60466e;
+}

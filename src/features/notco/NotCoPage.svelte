@@ -15,7 +15,7 @@
     <p>NotCo Chile · WhatsApp · Plan Pro</p>
   </div>
   <span class="backend-status"
-    ><span class="tiny-dot amber-dot"></span>Motor de IA pendiente</span
+    ><span class="tiny-dot amber-dot"></span>Cloudflare Workers AI</span
   >
 </div>
 <div class="agent-tabs tabs">

@@ -1,3 +1,4 @@
+import { requestReply } from './chat.js';
 import { initialPrompt } from './data/prompt.js';
 import { testCases } from './data/testCases.js';
 import { download } from '../../shared/utils/download.js';
@@ -8,6 +9,70 @@ export function createNotCoAgent(feedback) {
   let saved = $state(false);
   let query = $state('');
   let revisions = $state([]);
+  let messages = $state([]);
+  let sending = $state(false);
+  let chatError = $state('');
+  let testResults = $state([]);
+  let testing = $state(false);
+  let testPrompt = $state('');
+
+  async function sendMessage() {
+    const content = query.trim();
+    if (!content || sending) return;
+    const previous = messages;
+    const next = [...messages, { role: 'user', content }];
+    messages = next;
+    query = '';
+    sending = true;
+    chatError = '';
+    try {
+      const response = await requestReply(prompt, next);
+      messages = [...next, { role: 'assistant', content: response }];
+    } catch (error) {
+      messages = previous;
+      query = content;
+      chatError = error.message;
+    } finally {
+      sending = false;
+    }
+  }
+  function resetChat() {
+    if (sending) return;
+    messages = [];
+    query = '';
+    chatError = '';
+  }
+  async function runTests() {
+    if (testing) return;
+    testing = true;
+    testPrompt = prompt;
+    testResults = [];
+    try {
+      for (const test of testCases) {
+        try {
+          const response = await requestReply(testPrompt, [
+            { role: 'user', content: test.message },
+          ]);
+          testResults = [
+            ...testResults,
+            { message: test.message, response, verdict: 'review' },
+          ];
+        } catch (error) {
+          testResults = [
+            ...testResults,
+            {
+              message: test.message,
+              response: null,
+              verdict: 'error',
+              error: error.message,
+            },
+          ];
+        }
+      }
+    } finally {
+      testing = false;
+    }
+  }
   try {
     const stored = localStorage.getItem('versu-prompt');
     if (stored) prompt = stored;
@@ -36,13 +101,15 @@ export function createNotCoAgent(feedback) {
       'notco-pruebas.json',
       JSON.stringify(
         {
-          mode: 'pending-backend',
-          system: prompt,
-          cases: messages.map((message) => ({
-            message,
-            response: null,
-            verdict: 'pending',
-          })),
+          mode: 'cloudflare-workers-ai',
+          system: testResults.length ? testPrompt : prompt,
+          cases: testResults.length
+            ? testResults
+            : messages.map((message) => ({
+                message,
+                response: null,
+                verdict: 'pending',
+              })),
         },
         null,
         2,
@@ -78,6 +145,27 @@ export function createNotCoAgent(feedback) {
     get revisions() {
       return revisions;
     },
+    get messages() {
+      return messages;
+    },
+    get sending() {
+      return sending;
+    },
+    get chatError() {
+      return chatError;
+    },
+    get testResults() {
+      return testResults;
+    },
+    get testing() {
+      return testing;
+    },
+    get testsStale() {
+      return testResults.length > 0 && testPrompt !== prompt;
+    },
+    sendMessage,
+    resetChat,
+    runTests,
     savePrompt,
     testPayload,
   };
