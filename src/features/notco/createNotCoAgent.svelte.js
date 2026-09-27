@@ -4,6 +4,10 @@ import { initialPrompt } from './data/prompt.js';
 import { testCases } from './data/testCases.js';
 import { download } from '../../shared/utils/download.js';
 
+function withoutEmbeddedCatalog(prompt) {
+  return prompt.split(/\nCATÁLOGO · ARCHIVO DEL CASO\r?\n/)[0].trimEnd();
+}
+
 export function createNotCoAgent(feedback) {
   let prompt = $state(initialPrompt);
   let agentTab = $state('editor');
@@ -76,7 +80,7 @@ export function createNotCoAgent(feedback) {
   }
   try {
     const stored = localStorage.getItem('versu-prompt');
-    if (stored) prompt = stored;
+    if (stored) prompt = withoutEmbeddedCatalog(stored);
     const history = JSON.parse(localStorage.getItem('versu-revisions') || '[]');
     if (Array.isArray(history)) revisions = history;
   } catch {
@@ -125,7 +129,7 @@ export function createNotCoAgent(feedback) {
       return prompt;
     },
     set prompt(value) {
-      prompt = value;
+      prompt = withoutEmbeddedCatalog(value);
     },
     get agentTab() {
       return agentTab;

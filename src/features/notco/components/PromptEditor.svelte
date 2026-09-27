@@ -77,7 +77,7 @@
     {/each}
   </div>
   <div class="editor-footer">
-    <span>Incluye el catálogo del archivo</span><button
+    <button
       class="button primary"
       disabled={!agent.hasPromptChanges}
       onclick={agent.savePrompt}

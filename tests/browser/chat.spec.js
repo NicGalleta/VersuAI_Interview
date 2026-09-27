@@ -165,7 +165,7 @@ test('collapsible prompt sections preserve the full prompt when editing and send
   });
   await page.goto('/');
   await page.getByRole('button', { name: 'Agente NotCo', exact: true }).click();
-  await expect(page.locator('.prompt-section')).toHaveCount(8);
+  await expect(page.locator('.prompt-section')).toHaveCount(7);
   await expect(
     page.getByRole('button', { name: 'Guardar versión' }),
   ).toBeDisabled();
@@ -226,5 +226,5 @@ test('collapsible prompt sections preserve the full prompt when editing and send
   await page.locator('.revisions summary').click();
   await page.locator('.revisions button').last().click();
   await expect(identity).toHaveValue('Identidad temporal.');
-  await expect(page.locator('.prompt-section')).toHaveCount(8);
+  await expect(page.locator('.prompt-section')).toHaveCount(7);
 });
