@@ -1,5 +1,5 @@
 <script>
-  import { SlidersHorizontal, Search } from 'lucide-svelte';
+  import { Search } from 'lucide-svelte';
   import AccountFilters from './AccountFilters.svelte';
   import AccountRow from './AccountRow.svelte';
   let { navigation, sources, portfolio } = $props();
@@ -11,17 +11,16 @@
       <h2>
         {navigation.page === 'accounts'
           ? 'Cartera de clientes'
-          : 'A quién llamar esta semana'}<span class="count-pill"
+          : 'Cuentas con señales'}<span class="count-pill"
           >{portfolio.visible.length}</span
         >
       </h2>
       <p>
         {navigation.page === 'accounts'
-          ? 'Selecciona una cuenta para ver su historia.'
-          : 'Ordenadas por urgencia y luego por MRR. Cada señal tiene un porqué.'}
+          ? 'Estado, señales y responsables de la cartera.'
+          : 'Señales de continuidad, adopción y expansión.'}
       </p>
     </div>
-    <span class="sort-label"><SlidersHorizontal size={14} />Prioridad ↓</span>
   </div>
   <AccountFilters {portfolio} />
   <div class="table-scroll">
@@ -41,8 +40,8 @@
     </table>
     {#if !portfolio.visible.length}<div class="empty">
         <Search size={28} />
-        <h3>No hay cuentas en esta vista</h3>
-        <p>Prueba otro filtro o carga nuevos datos.</p>
+        <h3>Sin resultados</h3>
+        <p>No hay cuentas que coincidan con los filtros actuales.</p>
         <button
           class="button"
           onclick={() => {

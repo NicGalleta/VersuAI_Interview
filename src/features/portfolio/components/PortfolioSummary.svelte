@@ -1,28 +1,33 @@
 <script>
   import { Users, AlertTriangle, Activity, TrendingUp } from 'lucide-svelte';
   import { money } from '../../../shared/utils/format.js';
+  import SignalOverview from './SignalOverview.svelte';
   let { navigation, portfolio } = $props();
 </script>
 
 <div class="stats-grid">
-  <button
-    class="stat-card"
-    onclick={() => {
-      portfolio.filter = 'all';
-      navigation.page = 'accounts';
-    }}
-    ><div>
-      <span>Cuentas en cartera</span><span class="stat-icon neutral"
-        ><Users size={18} /></span
-      >
-    </div>
-    <strong>{portfolio.accounts.length}<small>cuentas</small></strong>
-    <p>
-      <span class="tiny-dot green"></span>{portfolio.accounts.filter(
-        (a) => a.fresh,
-      ).length} con datos del último corte
-    </p></button
-  >
+  {#if navigation.page === 'overview'}
+    <SignalOverview {portfolio} />
+  {:else}
+    <button
+      class="stat-card"
+      onclick={() => {
+        portfolio.filter = 'all';
+        navigation.page = 'accounts';
+      }}
+      ><div>
+        <span>Cuentas en cartera</span><span class="stat-icon neutral"
+          ><Users size={18} /></span
+        >
+      </div>
+      <strong>{portfolio.accounts.length}<small>cuentas</small></strong>
+      <p>
+        <span class="tiny-dot green"></span>{portfolio.accounts.filter(
+          (a) => a.fresh,
+        ).length} con datos del último corte
+      </p></button
+    >
+  {/if}
   <button
     class="stat-card"
     onclick={() => {

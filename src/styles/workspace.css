@@ -74,6 +74,9 @@
 .nav-label.second {
   margin-top: 34px;
 }
+.brand + .nav-label {
+  margin-top: 35px;
+}
 nav button {
   display: flex;
   align-items: center;
@@ -210,12 +213,15 @@ nav button span:nth-child(2) {
   font-weight: 500;
   color: #5c596c;
 }
-.topbar .local-badge {
+.local-badge {
   font-size: 10px;
   color: #7f818c;
   display: flex;
   align-items: center;
   gap: 7px;
+}
+.sidebar > .local-badge {
+  margin: 14px 13px 0;
 }
 .local-badge > span {
   width: 5px;

@@ -1,10 +1,8 @@
 <script>
   import Sidebar from './app/layout/Sidebar.svelte';
-  import Topbar from './app/layout/Topbar.svelte';
   import PageHeading from './app/layout/PageHeading.svelte';
   import { pages } from './app/pages.js';
   import PortfolioActions from './features/portfolio/components/PortfolioActions.svelte';
-  import PromptDownload from './features/notco/components/PromptDownload.svelte';
   import Footer from './app/layout/Footer.svelte';
   import FeedbackBanner from './shared/components/FeedbackBanner.svelte';
   import PortfolioPage from './features/portfolio/PortfolioPage.svelte';
@@ -32,7 +30,6 @@
 <div class="app-shell">
   <Sidebar {navigation} {sources} {portfolio} {feedback} />
   <div class="main-shell">
-    <Topbar {navigation} {sources} />
     <main>
       <PageHeading page={pages[navigation.page]}>
         {#if navigation.page === 'overview' || navigation.page === 'accounts'}
@@ -40,8 +37,6 @@
             {portfolio}
             onUpload={() => navigation.navigate('data')}
           />
-        {:else if navigation.page === 'agent'}
-          <PromptDownload {agent} />
         {/if}
       </PageHeading>
       <FeedbackBanner {feedback} />
@@ -54,7 +49,7 @@
       {:else if navigation.page === 'agent'}
         <NotCoPage {agent} />
       {/if}
-      <Footer />
+      {#if navigation.page !== 'agent'}<Footer />{/if}
     </main>
   </div>
 </div>

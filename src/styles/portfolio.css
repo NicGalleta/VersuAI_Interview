@@ -247,6 +247,21 @@
 .signal-panel {
   padding: 21px 23px;
 }
+.stats-grid > .signal-panel {
+  min-width: 0;
+  padding: 18px 19px 16px;
+}
+.stats-grid > .signal-panel .panel-heading {
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  margin-bottom: 12px;
+}
+.stats-grid > .signal-panel .signal-bar-row {
+  margin-bottom: 8px;
+}
+.stats-grid > .signal-panel > .micro {
+  margin-top: 10px;
+}
 .panel-heading {
   display: flex;
   justify-content: space-between;

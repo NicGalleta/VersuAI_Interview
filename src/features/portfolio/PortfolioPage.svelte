@@ -8,8 +8,6 @@
   } from 'lucide-svelte';
   import { monthName } from '../../shared/utils/format.js';
   import PortfolioSummary from './components/PortfolioSummary.svelte';
-  import WeeklyFocus from './components/WeeklyFocus.svelte';
-  import SignalOverview from './components/SignalOverview.svelte';
   import AccountTable from './components/AccountTable.svelte';
   let { navigation, sources, portfolio } = $props();
 </script>
@@ -25,7 +23,9 @@
     >Ver criterios<ArrowUpRight size={14} /></button
   >
 </div>
-{#if !sources.customers.length}<div class="data-hint">
+{#if navigation.page !== 'overview' && !sources.customers.length}<div
+    class="data-hint"
+  >
     <span
       ><Database size={15} /><strong>Vista de ejemplo</strong> · Uso real del caso,
       sin fichas de contacto. Faltan responsables y señales de onboarding.</span
@@ -34,13 +34,6 @@
     >
   </div>{/if}
 <PortfolioSummary {navigation} {portfolio} />
-
-{#if navigation.page === 'overview'}
-  <div class="insight-grid">
-    <WeeklyFocus {portfolio} />
-    <SignalOverview {portfolio} />
-  </div>
-{/if}
 
 <AccountTable {navigation} {sources} {portfolio} />
 <div class="bottom-note">

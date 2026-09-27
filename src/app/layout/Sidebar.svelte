@@ -6,7 +6,6 @@
     SlidersHorizontal,
     Database,
     ArrowUpRight,
-    ChevronDown,
     CircleHelp,
     Sparkles,
   } from 'lucide-svelte';
@@ -41,13 +40,6 @@
       height="36"
     /></a
   >
-  <div class="workspace">
-    <div class="workspace-icon">O</div>
-    <div>
-      <strong>Ops workspace</strong><small>Versu · Latinoamérica</small>
-    </div>
-    <ChevronDown size={14} />
-  </div>
   <div class="nav-label">WORKSPACE</div>
   <nav aria-label="Navegación principal">
     {#each nav as item}<button
@@ -74,6 +66,7 @@
       ><SlidersHorizontal size={18} />Reglas y criterios</button
     >
   </nav>
+  <span class="local-badge" title="Datos locales"><span></span>Datos locales</span>
   <div class="sidebar-bottom">
     <div class="draft-note">
       <Sparkles size={17} /><strong>Menos ruido. Más foco.</strong>

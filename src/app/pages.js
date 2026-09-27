@@ -1,23 +1,18 @@
 export const pages = {
   overview: {
     label: 'Resumen',
-    title: 'Tu semana, bajo control.',
-    description:
-      'Las señales que importan. Las conversaciones que no pueden esperar.',
+    title: 'Resumen de cartera',
     eyebrow: 'CASO 01 / SALUD DE CARTERA',
   },
   accounts: {
     label: 'Cartera de clientes',
-    title: 'Cada cuenta, en contexto.',
-    description: 'Explora la cartera y prepara la próxima conversación.',
+    title: 'Cartera de clientes',
+    description: 'Información y estado de las cuentas.',
     eyebrow: 'CASO 01 / SALUD DE CARTERA',
   },
   agent: {
     label: 'Agente NotCo',
-    title: 'Una voz muy NotCo.',
-    description:
-      'Edita el prompt, revisa el catálogo y prepara las pruebas de Nota.',
-    eyebrow: 'CASO 02 / IMPLEMENTACIÓN',
+    title: 'Agente NotCo',
   },
   data: {
     label: 'Fuentes de datos',

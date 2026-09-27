@@ -8,16 +8,6 @@
   let { agent } = $props();
 </script>
 
-<div class="agent-status">
-  <div class="notco-logo">N</div>
-  <div>
-    <strong>Nota <span class="badge growth">Borrador</span></strong>
-    <p>NotCo Chile · WhatsApp · Plan Pro</p>
-  </div>
-  <span class="backend-status"
-    ><span class="tiny-dot amber-dot"></span>Cloudflare Workers AI</span
-  >
-</div>
 <div class="agent-tabs tabs">
   {#each [{ id: 'editor', label: 'Prompt y conversación' }, { id: 'tests', label: 'Batería de pruebas · 8' }, { id: 'catalog', label: `Catálogo · ${products.length}` }, { id: 'questions', label: 'Antes de activar' }] as tab}<button
       class:chosen={agent.agentTab === tab.id}
