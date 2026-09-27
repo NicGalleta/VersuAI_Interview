@@ -11,6 +11,7 @@ Todo estaba en los datos, busquemoslo
 
 ## pendiente ver
 
+- cambiar readme !!
 - Enfasis en explorar y ordenar datos sucios (pagina 4/8 pdf)
 - las jugueterias, experimentan caidas de ventas parecidas en otras fechas relacionadas a juguetes? (agosto dia del niño, diciembre-enero por navidad)
 - Que clientes realmente son la prioridad?
@@ -26,3 +27,22 @@ Todo estaba en los datos, busquemoslo
 - Que tipo de clientes tiene cada cliente? ver si son mayoritariamente B2B o B2C (podria ser una nueva columna en clientes.csv). Esto me puede ayudar a crear/diferenciar el prompt
 - Ver más metadatos del chatter para diferenciar el prompt
   1. Por ejemplo, si el chatter tiene cuenta en la página o historial en el chat, se puede diferenciar o profundizar el prompt
+
+# Estructura Presentacion
+
+0. Presentacion personal -> chess, ball, grunge, ganas de ser parte del equipo
+1. Mostrar el problema
+2. Supuestos
+3. Decisiones
+4. Solucion
+5. Caso NotCo
+6. Tests
+7. Qué dejé fuera (?)
+8. Si tuviera una semana extra...
+
+# Recursos IA utilizados
+
+- OpenAI chatgpt: organizacion, analisis
+- OpenAI Codex: implementacion frontend
+- Cloudfare AI Assistant: simple infraestructura cloud (workers)
+- Meta: @cf/meta/llama-3.1-8b-instruct LLM como chatbot
