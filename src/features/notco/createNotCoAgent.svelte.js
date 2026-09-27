@@ -1,3 +1,4 @@
+import { untrack } from 'svelte';
 import { requestReply } from './chat.js';
 import { initialPrompt } from './data/prompt.js';
 import { testCases } from './data/testCases.js';
@@ -81,6 +82,7 @@ export function createNotCoAgent(feedback) {
   } catch {
     /* Storage may be unavailable. */
   }
+  let savedPrompt = $state(untrack(() => prompt));
   function savePrompt() {
     try {
       const next = [
@@ -90,6 +92,7 @@ export function createNotCoAgent(feedback) {
       localStorage.setItem('versu-prompt', prompt);
       localStorage.setItem('versu-revisions', JSON.stringify(next));
       revisions = next;
+      savedPrompt = prompt;
       saved = true;
     } catch {
       feedback.notice =
@@ -132,6 +135,9 @@ export function createNotCoAgent(feedback) {
     },
     get saved() {
       return saved;
+    },
+    get hasPromptChanges() {
+      return prompt !== savedPrompt;
     },
     set saved(value) {
       saved = value;

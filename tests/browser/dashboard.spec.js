@@ -67,6 +67,10 @@ test('CSV validation preserves previous data and accepts a private profile uploa
 test('criteria recalculate and NotCo exports current prompt with all eight tests', async ({
   page,
 }) => {
+  await page.addInitScript(() => {
+    if (!localStorage.getItem('versu-prompt'))
+      localStorage.setItem('versu-prompt', 'Prompt de prueba');
+  });
   await page.goto('/');
   await page.getByRole('button', { name: 'Reglas y criterios' }).click();
   const before = await page.locator('.impact-number').textContent();
@@ -78,6 +82,7 @@ test('criteria recalculate and NotCo exports current prompt with all eight tests
     .fill('60');
   await expect(page.locator('.impact-number')).not.toHaveText(before);
   await page.getByRole('button', { name: 'Agente NotCo', exact: true }).click();
+  await page.locator('.prompt-section summary').click();
   await page
     .getByRole('textbox', { name: 'Prompt de Nota' })
     .fill('PROMPT EDITADO PARA PRUEBA');
@@ -96,6 +101,7 @@ test('criteria recalculate and NotCo exports current prompt with all eight tests
   expect(payload.cases.every((c) => c.response === null)).toBe(true);
   await page.reload();
   await page.getByRole('button', { name: 'Agente NotCo', exact: true }).click();
+  await page.locator('.prompt-section summary').click();
   await expect(
     page.getByRole('textbox', { name: 'Prompt de Nota' }),
   ).toHaveValue('PROMPT EDITADO PARA PRUEBA');
@@ -128,8 +134,13 @@ test('feature state survives page and tab changes without saving', async ({
       warnings.push(message.text());
     }
   });
+  await page.addInitScript(() => {
+    if (!localStorage.getItem('versu-prompt'))
+      localStorage.setItem('versu-prompt', 'Prompt de prueba');
+  });
   await page.goto('/');
   await page.getByRole('button', { name: 'Agente NotCo', exact: true }).click();
+  await page.locator('.prompt-section summary').click();
   await page
     .getByRole('textbox', { name: 'Prompt de Nota' })
     .fill('Unsaved prompt');
@@ -144,6 +155,7 @@ test('feature state survives page and tab changes without saving', async ({
   await page.getByRole('button', { name: 'Agente NotCo', exact: true }).click();
   await expect(page.locator('.test-card')).toHaveCount(8);
   await page.getByRole('button', { name: 'Prompt y conversación' }).click();
+  await page.locator('.prompt-section summary').click();
   await expect(
     page.getByRole('textbox', { name: 'Prompt de Nota' }),
   ).toHaveValue('Unsaved prompt');

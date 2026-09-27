@@ -7,6 +7,7 @@ async function openAgent(page) {
   );
   await page.goto('/');
   await page.getByRole('button', { name: 'Agente NotCo', exact: true }).click();
+  await page.locator('.prompt-section summary').click();
   await page
     .getByRole('textbox', { name: 'Prompt de Nota' })
     .fill('Prompt de prueba');
@@ -132,6 +133,7 @@ test('test suite uses isolated conversations and exports results with its prompt
     ),
   ).toBe(true);
   await page.getByRole('button', { name: 'Prompt y conversación' }).click();
+  await page.locator('.prompt-section summary').click();
   await page
     .getByRole('textbox', { name: 'Prompt de Nota' })
     .fill('Otro prompt');
@@ -153,3 +155,76 @@ test('test suite uses isolated conversations and exports results with its prompt
   expect(payload.cases[1].verdict).toBe('error');
 });
 
+test('collapsible prompt sections preserve the full prompt when editing and sending', async ({
+  page,
+}) => {
+  const requests = [];
+  await page.route(chatEndpoint, async (route) => {
+    requests.push(route.request().postDataJSON());
+    await route.fulfill({ json: { response: 'Hola' } });
+  });
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Agente NotCo', exact: true }).click();
+  await expect(page.locator('.prompt-section')).toHaveCount(8);
+  await expect(
+    page.getByRole('button', { name: 'Guardar versión' }),
+  ).toBeDisabled();
+  const downloading = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Descargar prompt' }).click();
+  const stream = await (await downloading).createReadStream();
+  let original = '';
+  for await (const chunk of stream) original += chunk;
+  await page
+    .locator('.prompt-section summary')
+    .filter({ hasText: /^IDENTIDAD$/ })
+    .click();
+  const identity = page.getByRole('textbox', {
+    name: 'IDENTIDAD',
+    exact: true,
+  });
+  const oldIdentity = await identity.inputValue();
+  await identity.fill('Identidad temporal.');
+  await page.getByRole('button', { name: 'Guardar versión' }).click();
+  await identity.fill('Identidad actualizada.');
+  await identity.press('End');
+  await identity.pressSequentially(' Otra frase.');
+  await page
+    .locator('.prompt-section summary')
+    .filter({ hasText: /^IDENTIDAD$/ })
+    .click();
+  await expect(identity).toBeHidden();
+  await page
+    .locator('.prompt-section summary')
+    .filter({ hasText: /^PERSONALIDAD$/ })
+    .click();
+  const personality = page.getByRole('textbox', {
+    name: 'PERSONALIDAD',
+    exact: true,
+  });
+  const oldPersonality = await personality.inputValue();
+  await personality.fill('Tono cordial.');
+  const expected = original
+    .replace(oldIdentity, 'Identidad actualizada. Otra frase.')
+    .replace(oldPersonality, 'Tono cordial.');
+  await page.getByRole('button', { name: 'Guardar versión' }).click();
+  expect(await page.evaluate(() => localStorage.getItem('versu-prompt'))).toBe(
+    expected,
+  );
+  await page.getByRole('textbox', { name: 'Mensaje de prueba' }).fill('Hola');
+  await page.getByRole('button', { name: 'Enviar mensaje' }).click();
+  await expect(page.locator('.assistant-bubble')).toHaveCount(1);
+  expect(requests[0].systemPrompt).toContain(
+    `${expected}\n\nFECHA Y HORA ACTUAL\n`,
+  );
+  await page.reload();
+  await page.getByRole('button', { name: 'Agente NotCo', exact: true }).click();
+  await page
+    .locator('.prompt-section summary')
+    .filter({ hasText: /^IDENTIDAD$/ })
+    .click();
+  await expect(identity).toHaveValue('Identidad actualizada. Otra frase.');
+  await page.locator('.revisions summary').click();
+  await page.locator('.revisions button').last().click();
+  await expect(identity).toHaveValue('Identidad temporal.');
+  await expect(page.locator('.prompt-section')).toHaveCount(8);
+});

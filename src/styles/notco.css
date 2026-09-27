@@ -55,10 +55,29 @@
   margin: 0;
   border-bottom: 1px solid var(--border);
 }
+.prompt-section + .prompt-section {
+  border-top: 1px solid var(--border);
+}
+.prompt-section summary {
+  padding: 16px 19px;
+  cursor: pointer;
+  color: #60466e;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.prompt-section summary:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: -3px;
+}
+.prompt-section[open] summary {
+  border-bottom: 1px solid var(--border);
+}
 .prompt-editor {
   display: block;
   width: 100%;
-  min-height: 470px;
+  min-height: 180px;
   border: 0;
   padding: 23px;
   background: #fdfcff;
