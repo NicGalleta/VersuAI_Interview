@@ -1,0 +1,12 @@
+{
+  "name": "versuai-chatbot",
+  "main": "src/index.js",
+  "compatibility_date": "2026-09-25",
+  "ai": {
+    "binding": "AI",
+  },
+  "vars": {
+    "AI_MODEL": "@cf/meta/llama-3.1-8b-instruct-fp8",
+    "ALLOWED_ORIGINS": "https://versuai-interview.nicoversu.workers.dev,http://127.0.0.1:5173,http://localhost:5173",
+  },
+}
