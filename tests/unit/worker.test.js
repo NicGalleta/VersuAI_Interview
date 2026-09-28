@@ -72,6 +72,7 @@ test('chat forwards prompt and history to the configured model and returns text'
     ],
   };
   const response = await worker.fetch(request(body), {
+    CATALOGUE_DB: { prepare: () => ({ all: async () => ({ results: [] }) }) },
     AI_MODEL: 'test-model',
     AI: {
       run: async (...args) => {
@@ -173,4 +174,117 @@ test('health check reports default model and unknown routes return JSON with COR
     missing.headers.get('Access-Control-Allow-Origin'),
     productionOrigin,
   );
+});
+
+for (const asObject of [true, false]) {
+  test(`evaluation requests JSON and normalizes ${asObject ? 'object' : 'string'} output without querying D1`, async () => {
+    const evaluation = {
+      results: [{ id: '1', verdict: 'pass', reason: 'Cumple.' }],
+    };
+    let options;
+    const body = {
+      mode: 'evaluation',
+      systemPrompt: 'Evalúa y devuelve JSON.',
+      messages: [
+        {
+          role: 'user',
+          content: JSON.stringify({
+            cases: [
+              { id: '1', message: 'precio notmilk', response: 'Sin stock.' },
+            ],
+          }),
+        },
+      ],
+    };
+    const response = await worker.fetch(request(body), {
+      CATALOGUE_DB: {
+        prepare: () => {
+          assert.fail('Evaluation must not query D1');
+        },
+      },
+      AI: {
+        run: async (_model, input) => {
+          options = input;
+          return {
+            response: asObject ? evaluation : JSON.stringify(evaluation),
+          };
+        },
+      },
+    });
+    assert.equal(response.status, 200);
+    assert.deepEqual(JSON.parse((await response.json()).response), evaluation);
+    assert.equal(options.response_format.type, 'json_schema');
+    assert.equal(options.max_tokens, 512);
+    assert.equal(options.temperature, 0);
+    assert.deepEqual(options.messages, [
+      { role: 'system', content: body.systemPrompt },
+      ...body.messages,
+    ]);
+  });
+}
+
+test('product chat still injects D1 catalogue and does not request JSON mode', async () => {
+  let options;
+  const response = await worker.fetch(
+    request({
+      ...validBody,
+      messages: [{ role: 'user', content: 'precio notmilk' }],
+    }),
+    {
+      CATALOGUE_DB: {
+        prepare: () => ({
+          all: async () => ({
+            results: [
+              {
+                sku: 'NM-1',
+                producto: 'NotMilk',
+                categoria: 'Leche',
+                formato: '1 L',
+                precio_clp: 2000,
+                stock: 4,
+                activo: 1,
+              },
+            ],
+          }),
+        }),
+      },
+      AI: {
+        run: async (_model, input) => {
+          options = input;
+          return { response: 'Cuesta $2.000.' };
+        },
+      },
+    },
+  );
+  assert.equal(response.status, 200);
+  assert.match(options.messages[0].content, /NM-1.*NotMilk.*2000/);
+  assert.equal(options.response_format, undefined);
+});
+
+test('catalogue errors retain CORS and have a distinct error code', async () => {
+  const response = await worker.fetch(
+    request({ ...validBody, messages: [{ role: 'user', content: 'NotMilk' }] }),
+    {
+      CATALOGUE_DB: {
+        prepare: () => {
+          throw new Error('db failed');
+        },
+      },
+      AI: { run: () => assert.fail('Must not infer without catalogue') },
+    },
+  );
+  assert.equal(response.status, 503);
+  assert.equal((await response.json()).code, 'CATALOGUE_FAILED');
+  assert.equal(
+    response.headers.get('Access-Control-Allow-Origin'),
+    productionOrigin,
+  );
+});
+
+test('unsupported modes are rejected before inference', async () => {
+  const response = await worker.fetch(
+    request({ ...validBody, mode: 'invalid' }),
+    {},
+  );
+  assert.equal(response.status, 400);
 });

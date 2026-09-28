@@ -2,7 +2,11 @@ export const chatEndpoint =
   import.meta.env?.VITE_CHAT_ENDPOINT?.trim() ||
   'https://versuai-chatbot.nicoversu.workers.dev/chat';
 
-export async function requestReply(systemPrompt, messages) {
+export async function requestReply(
+  systemPrompt,
+  messages,
+  { mode = 'chat' } = {},
+) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 60000);
   try {
@@ -21,6 +25,7 @@ export async function requestReply(systemPrompt, messages) {
           ? `${systemPrompt}\n\n${timeContext}`
           : timeContext,
         messages,
+        ...(mode === 'evaluation' ? { mode } : {}),
       }),
       signal: controller.signal,
     });

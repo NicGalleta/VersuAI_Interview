@@ -31,6 +31,12 @@
   }
 
   let sections = $state([]);
+  const savedSections = $derived(
+    splitSections(agent.savedPrompt).map((section) => ({
+      title: section.title,
+      text: agent.savedPrompt.slice(section.start, section.end),
+    })),
+  );
   let displayedPrompt = $state(null);
   $effect(() => {
     if (agent.prompt !== displayedPrompt) {
@@ -66,7 +72,12 @@
   <div class="prompt-sections">
     {#each sections as section, index}
       <details class="prompt-section" open={false}>
-        <summary>{section.title}</summary>
+        <summary>
+          {section.title}
+          {#if section.title !== savedSections[index]?.title || agent.prompt.slice(section.start, section.end) !== savedSections[index]?.text}
+            <span class="section-changed">Con cambios</span>
+          {/if}
+        </summary>
         <textarea
           class="prompt-editor"
           aria-label={section.title}
@@ -99,6 +110,13 @@
 </section>
 
 <style>
+  .section-changed {
+    margin-left: 8px;
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 400;
+  }
+
   .editor-footer button:disabled {
     filter: grayscale(1);
   }

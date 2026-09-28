@@ -107,6 +107,21 @@ test('test suite uses isolated conversations and exports results with its prompt
   const requests = [];
   await page.route(chatEndpoint, async (route) => {
     requests.push(route.request().postDataJSON());
+    if (requests.length > 8) {
+      const cases = JSON.parse(requests.at(-1).messages[0].content).cases;
+      await route.fulfill({
+        json: {
+          response: JSON.stringify({
+            results: cases.map((item) => ({
+              id: item.id,
+              verdict: item.id === '3' ? 'fail' : 'pass',
+              reason: `Motivo ${item.id}`,
+            })),
+          }),
+        },
+      });
+      return;
+    }
     await route.fulfill(
       requests.length === 2
         ? { status: 429, json: { error: 'busy' } }
@@ -120,18 +135,28 @@ test('test suite uses isolated conversations and exports results with its prompt
     page.getByRole('button', { name: 'Ejecutar pruebas' }),
   ).toBeEnabled();
   await expect(
-    page.locator('.test-card .badge').filter({ hasText: 'Revisar' }),
-  ).toHaveCount(7);
+    page.locator('.test-card .badge').filter({ hasText: /^Cumple$/ }),
+  ).toHaveCount(6);
   await expect(
     page.locator('.test-card .badge').filter({ hasText: 'Error' }),
   ).toHaveCount(1);
-  expect(requests).toHaveLength(8);
+  expect(requests).toHaveLength(15);
+  for (const request of requests.slice(8)) {
+    expect(request.mode).toBe('evaluation');
+    const data = JSON.parse(request.messages[0].content);
+    expect(data.cases).toHaveLength(1);
+    expect(data).not.toHaveProperty('referencePolicies');
+  }
   expect(
-    requests.every(
-      (r) =>
-        r.messages.length === 1 &&
-        r.systemPrompt.startsWith('Prompt de prueba\n\nFECHA Y HORA ACTUAL\n'),
-    ),
+    requests
+      .slice(0, 8)
+      .every(
+        (r) =>
+          r.messages.length === 1 &&
+          r.systemPrompt.startsWith(
+            'Prompt de prueba\n\nFECHA Y HORA ACTUAL\n',
+          ),
+      ),
   ).toBe(true);
   await page.getByRole('button', { name: 'Prompt y conversación' }).click();
   await page.locator('.prompt-section summary').click();
@@ -154,6 +179,10 @@ test('test suite uses isolated conversations and exports results with its prompt
   expect(payload.cases).toHaveLength(8);
   expect(payload.cases[0].response).toBe('Respuesta 1');
   expect(payload.cases[1].verdict).toBe('error');
+  expect(payload.cases[0].verdict).toBe('pass');
+  expect(payload.cases[0].reason).toBe('Motivo 1');
+  expect(payload.cases[2].verdict).toBe('fail');
+  expect(payload.evaluation.referenceCatalog).toContain('sku');
 });
 
 test('collapsible prompt sections preserve the full prompt when editing and sending', async ({
@@ -173,7 +202,7 @@ test('collapsible prompt sections preserve the full prompt when editing and send
   const original = initialPrompt;
   await page
     .locator('.prompt-section summary')
-    .filter({ hasText: /^IDENTIDAD$/ })
+    .filter({ hasText: /^\s*IDENTIDAD(?:\s|$)/ })
     .click();
   const identity = page.getByRole('textbox', {
     name: 'IDENTIDAD',
@@ -187,12 +216,12 @@ test('collapsible prompt sections preserve the full prompt when editing and send
   await identity.pressSequentially(' Otra frase.');
   await page
     .locator('.prompt-section summary')
-    .filter({ hasText: /^IDENTIDAD$/ })
+    .filter({ hasText: /^\s*IDENTIDAD(?:\s|$)/ })
     .click();
   await expect(identity).toBeHidden();
   await page
     .locator('.prompt-section summary')
-    .filter({ hasText: /^PERSONALIDAD$/ })
+    .filter({ hasText: /^\s*PERSONALIDAD(?:\s|$)/ })
     .click();
   const personality = page.getByRole('textbox', {
     name: 'PERSONALIDAD',
@@ -217,7 +246,7 @@ test('collapsible prompt sections preserve the full prompt when editing and send
   await page.getByRole('button', { name: 'Agente NotCo', exact: true }).click();
   await page
     .locator('.prompt-section summary')
-    .filter({ hasText: /^IDENTIDAD$/ })
+    .filter({ hasText: /^\s*IDENTIDAD(?:\s|$)/ })
     .click();
   await expect(identity).toHaveValue('Identidad actualizada. Otra frase.');
   await page.locator('.revisions summary').click();
@@ -225,3 +254,52 @@ test('collapsible prompt sections preserve the full prompt when editing and send
   await expect(identity).toHaveValue('Identidad temporal.');
   await expect(page.locator('.prompt-section')).toHaveCount(8);
 });
+
+for (const failure of ['invalid', 'network']) {
+  test(`individual evaluation ${failure} preserves responses and continues without retrying`, async ({
+    page,
+  }) => {
+    let count = 0;
+    await page.route(chatEndpoint, async (route) => {
+      count++;
+      await route.fulfill(
+        count === 9 && failure === 'network'
+          ? { status: 502, json: { error: 'failed' } }
+          : {
+              json: {
+                response:
+                  count === 9
+                    ? 'invalid JSON'
+                    : count > 9
+                      ? JSON.stringify({
+                          results: [
+                            {
+                              id: String(count - 8),
+                              verdict: 'pass',
+                              reason: 'Cumple los criterios.',
+                            },
+                          ],
+                        })
+                      : `Respuesta ${count}`,
+              },
+            },
+      );
+    });
+    await openAgent(page);
+    await page.getByRole('button', { name: 'Batería de pruebas · 8' }).click();
+    await page.getByRole('button', { name: 'Ejecutar pruebas' }).click();
+    await expect(page.getByRole('alert')).toContainText(
+      'No se pudieron evaluar algunas pruebas',
+    );
+    await expect(
+      page.locator('.test-card .badge').filter({ hasText: 'No evaluable' }),
+    ).toHaveCount(1);
+    await expect(
+      page.locator('.test-card .badge').filter({ hasText: /^Cumple$/ }),
+    ).toHaveCount(7);
+    await expect(page.locator('.test-response').first()).toHaveText(
+      'Respuesta 1',
+    );
+    expect(count).toBe(16);
+  });
+}

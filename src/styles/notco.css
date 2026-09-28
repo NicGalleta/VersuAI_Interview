@@ -312,3 +312,7 @@
   font-size: 12px;
   color: #60466e;
 }
+.test-card .badge.passed {
+  color: #166534;
+  background: #dcfce7;
+}

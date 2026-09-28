@@ -2,6 +2,8 @@ import { untrack } from 'svelte';
 import { requestReply } from './chat.js';
 import { initialPrompt } from './data/prompt.js';
 import { testCases } from './data/testCases.js';
+import { catalog } from './data/catalog.js';
+import { evaluationPrompt, parseEvaluation } from './evaluate.js';
 import { download } from '../../shared/utils/download.js';
 
 function withoutEmbeddedCatalog(prompt) {
@@ -19,6 +21,9 @@ export function createNotCoAgent(feedback) {
   let chatError = $state('');
   let testResults = $state([]);
   let testing = $state(false);
+  let evaluating = $state(false);
+  let evaluationProgress = $state('');
+  let evaluationError = $state('');
   let testPrompt = $state('');
 
   async function sendMessage() {
@@ -52,6 +57,7 @@ export function createNotCoAgent(feedback) {
     testing = true;
     testPrompt = prompt;
     testResults = [];
+    evaluationError = '';
     try {
       for (const test of testCases) {
         try {
@@ -60,13 +66,13 @@ export function createNotCoAgent(feedback) {
           ]);
           testResults = [
             ...testResults,
-            { message: test.message, response, verdict: 'review' },
+            { ...test, response, verdict: 'pending_evaluation' },
           ];
         } catch (error) {
           testResults = [
             ...testResults,
             {
-              message: test.message,
+              ...test,
               response: null,
               verdict: 'error',
               error: error.message,
@@ -74,7 +80,63 @@ export function createNotCoAgent(feedback) {
           ];
         }
       }
+      const completed = testResults.filter(
+        (result) => result.verdict !== 'error',
+      );
+      for (const [index, result] of completed.entries()) {
+        evaluating = true;
+        evaluationProgress = `${index + 1}/${completed.length}`;
+        try {
+          const response = await requestReply(
+            evaluationPrompt,
+            [
+              {
+                role: 'user',
+                content: JSON.stringify({
+                  referenceCatalog: catalog,
+                  cases: [result].map(
+                    ({ id, message, should, shouldNot, response }) => ({
+                      id,
+                      message,
+                      should,
+                      shouldNot,
+                      response,
+                    }),
+                  ),
+                }),
+              },
+            ],
+            { mode: 'evaluation' },
+          );
+          const evaluations = parseEvaluation(response, [result.id]);
+          const byId = new Map(
+            evaluations.map((result) => [result.id, result]),
+          );
+          testResults = testResults.map((result) => ({
+            ...result,
+            ...byId.get(result.id),
+          }));
+        } catch (error) {
+          evaluationError = [
+            evaluationError,
+            `Prueba ${result.id}: ${error.message}`,
+          ]
+            .filter(Boolean)
+            .join(' ');
+          testResults = testResults.map((item) =>
+            item.id === result.id
+              ? {
+                  ...item,
+                  verdict: 'inconclusive',
+                  reason: `No se pudo evaluar: ${error.message}`,
+                  evaluationError: error.message,
+                }
+              : item,
+          );
+        }
+      }
     } finally {
+      evaluating = false;
       testing = false;
     }
   }
@@ -109,6 +171,12 @@ export function createNotCoAgent(feedback) {
       JSON.stringify(
         {
           mode: 'cloudflare-workers-ai',
+          evaluation: {
+            method: 'sequential-per-case-llm',
+            system: evaluationPrompt,
+            referenceCatalog: catalog,
+            error: evaluationError || null,
+          },
           system: testResults.length ? testPrompt : prompt,
           cases: testResults.length
             ? testResults
@@ -143,6 +211,9 @@ export function createNotCoAgent(feedback) {
     get hasPromptChanges() {
       return prompt !== savedPrompt;
     },
+    get savedPrompt() {
+      return savedPrompt;
+    },
     set saved(value) {
       saved = value;
     },
@@ -166,6 +237,15 @@ export function createNotCoAgent(feedback) {
     },
     get testResults() {
       return testResults;
+    },
+    get evaluationProgress() {
+      return evaluationProgress;
+    },
+    get evaluating() {
+      return evaluating;
+    },
+    get evaluationError() {
+      return evaluationError;
     },
     get testing() {
       return testing;

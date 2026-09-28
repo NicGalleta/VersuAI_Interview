@@ -67,3 +67,22 @@ test('outgoing requests refresh Santiago date and time without altering prompt o
   await requestReply('', messages);
   assert.ok(payloads[2].systemPrompt.startsWith('FECHA Y HORA ACTUAL\n'));
 });
+
+test('evaluation sets explicit mode and preserves the text contract for structured Worker output', async (t) => {
+  const { default: worker } = await import('../../worker/src/index.js');
+  const evaluation = {
+    results: [{ id: '1', verdict: 'pass', reason: 'Cumple.' }],
+  };
+  t.mock.method(globalThis, 'fetch', async (_url, options) => {
+    assert.equal(JSON.parse(options.body).mode, 'evaluation');
+    return worker.fetch(new Request('https://worker.example/chat', options), {
+      AI: { run: async () => ({ response: evaluation }) },
+    });
+  });
+  const response = await requestReply(
+    'Evalúa y devuelve JSON.',
+    [{ role: 'user', content: 'Producto precio stock' }],
+    { mode: 'evaluation' },
+  );
+  assert.deepEqual(JSON.parse(response), evaluation);
+});
